@@ -6,6 +6,8 @@ using System.Linq;
 public class camera : MonoBehaviour
 {
     public Transform[] keypoints;
+
+    Vector3 center;
     public MeshFilter[] meshs;
     Camera cameraToCapture;  // キャプチャするカメラ
     int imageWidth = 640;   // 保存する画像の幅
@@ -16,7 +18,27 @@ public class camera : MonoBehaviour
     {
         cameraToCapture = GetComponent<Camera>();
         StartCoroutine(CaptureAndSaveRoutine());
-        colliderset();
+        // colliderset();
+
+
+
+ var positions = keypoints.Select(point => point.position);
+
+    // 最小値と最大値をLINQで取得
+    float minX = positions.Min(pos => pos.x);
+    float minY = positions.Min(pos => pos.y);
+    float minZ = positions.Min(pos => pos.z);
+
+    float maxX = positions.Max(pos => pos.x);
+    float maxY = positions.Max(pos => pos.y);
+    float maxZ = positions.Max(pos => pos.z);
+
+    // 中心座標を計算
+    float centerX = (minX + maxX) / 2f;
+    float centerY = (minY + maxY) / 2f;
+    float centerZ = (minZ + maxZ) / 2f;
+        center = new Vector3(centerX, centerY, centerZ);
+
     }
 
 
@@ -41,15 +63,15 @@ public class camera : MonoBehaviour
         }
     }
     // string modelname = "fandataset";
-     string datasetname = "loddataset";
+     string datasetname = "stepladder";
 
     IEnumerator CaptureAndSaveRoutine()
     {
         string[] paths = {
-    $"../{datasetname}/labels/train",
-    $"../{datasetname}/labels/val",
-    $"../{datasetname}/images/train",
-    $"../{datasetname}/images/val"
+    $"../dataset/{datasetname}/labels/train",
+    $"../dataset/{datasetname}/labels/val",
+    $"../dataset/{datasetname}/images/train",
+    $"../dataset/{datasetname}/images/val"
 };
         foreach (var path in paths)
         {
@@ -67,12 +89,15 @@ public class camera : MonoBehaviour
         {
             count += 1;
             yield return null;
-            if (count % 100 == 0)
-                this.transform.parent.position = new Vector3(Random.Range(-1.0f, 20.0f)*0.5f, 1.0f, Random.Range(-15.0f, 15.0f)*0.5f);
+            // if (count % 100 == 0)
+            //     this.transform.parent.position = new Vector3(Random.Range(-1.0f, 20.0f)*0.5f, 1.0f, Random.Range(-15.0f, 15.0f)*0.5f);
 
-            transform.localPosition = GetRandomPosition();
-            cameraToCapture.transform.LookAt(transform.parent.position);
-            Vector3 rootpos = GetRandomPosition() * 2;
+            transform.localPosition = GetRandomPosition()*2.0f;
+
+
+
+            cameraToCapture.transform.LookAt(center);
+            Vector3 rootpos = GetRandomPosition() * 10f;
             rootpos.y = 1;
             // transform.root.localPosition = rootpos;
 
@@ -85,9 +110,9 @@ public class camera : MonoBehaviour
             (string text, int viewableCount) = keypoint(name);
             // if (viewableCount < 2) continue;
             i += 1;
-            File.WriteAllText($"../{datasetname}/labels/{type}/{name}.txt", text);
+            File.WriteAllText($"../dataset/{datasetname}/labels/{type}/{name}.txt", text);
             byte[] bytes = CaptureAndSave(name);
-            File.WriteAllBytes($"../{datasetname}/images/{type}/{name}.png", bytes);
+            File.WriteAllBytes($"../dataset/{datasetname}/images/{type}/{name}.png", bytes);
             print($"{type}/{name}");
             // break;
 
