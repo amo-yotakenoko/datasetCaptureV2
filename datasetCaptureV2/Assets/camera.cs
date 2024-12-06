@@ -112,7 +112,7 @@ public class camera : MonoBehaviour
             i += 1;
             File.WriteAllText($"../dataset/{datasetname}/labels/{type}/{name}.txt", text);
             byte[] bytes = CaptureAndSave(name);
-            File.WriteAllBytes($"../dataset/{datasetname}/images/{type}/{name}.png", bytes);
+            File.WriteAllBytes($"../dataset/{datasetname}/images/{type}/{name}.jpg", bytes);
             print($"{type}/{name}");
             // break;
 
